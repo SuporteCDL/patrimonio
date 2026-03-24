@@ -8,26 +8,25 @@ import {
   MenubarMenu,
   MenubarSeparator,
   MenubarShortcut,
-  MenubarSub,
-  MenubarSubContent,
-  MenubarSubTrigger,
   MenubarTrigger,
 } from "@/components/ui/menubar"
 import Localidades from "@/pages/localidades"
 import Grupos from "@/pages/grupos"
 import SubGrupos from "@/pages/subgrupos"
 import Marcas from "@/pages/marcas"
+import ConferirAtivos from "@/pages/conferirativos"
 import Usuarios from "@/pages/usuarios"
 import CentroCusto from "@/pages/centrocusto"
 import Header from "@/components/header"
 import MovAtivos from "@/pages/movativos"
-import ConfAtivos from "@/pages/confereativos"
+import Conferencia from "@/pages/conferencia"
 import Logout from "@/pages/logout"
 import RelConferir from "@/pages/relconferir"
 import RelGeral from "@/pages/relgeral"
 import RelBaixa from "@/pages/relbaixa"
 import Situacoes from "@/pages/situacoes"
 import AtivosPorCentroCustoQtd from "@/pages/relativosporccqtd"
+import ConferenciaItens from "@/pages/conferenciaitens"
 
 export default function Menu() {
   return (
@@ -87,15 +86,20 @@ export default function Menu() {
                     Usuários <MenubarShortcut>⌘U</MenubarShortcut>
                   </Link>
                 </MenubarItem>
+                <MenubarItem asChild className="text-2xl lg:text-lg">
+                  <Link to='/conferencia'>
+                    Conferencia
+                  </Link>
+                </MenubarItem>
                 <MenubarSeparator />
               </MenubarContent>
             </MenubarMenu>
 
-            <MenubarMenu>
+            {/* <MenubarMenu>
               <MenubarTrigger asChild className="text-2xl lg:text-lg">
-                <Link to='conferencia'>Conferência</Link>
+                <Link to='conferirativos'>Conferir Ativos</Link>
               </MenubarTrigger>
-            </MenubarMenu>
+            </MenubarMenu> */}
             
             <MenubarMenu>
               <MenubarTrigger className="text-2xl lg:text-lg">Relatórios</MenubarTrigger>
@@ -141,8 +145,10 @@ export default function Menu() {
             <Route path="/ativos" element={<Ativos />} />
             <Route path="/situacoes" element={<Situacoes />} />
             <Route path="/usuarios" element={<Usuarios />} />
+            <Route path="/conferencia" element={<Conferencia />} />
             <Route path="/movativos" element={<MovAtivos />} />
-            <Route path="/conferencia" element={<ConfAtivos />} />
+            <Route path="/conferirativos" element={<ConferirAtivos />} />
+            <Route path="/conferenciaitens/:id" element={<ConferenciaItens />} />
             <Route path="/relconferir" element={<RelConferir />} />
             <Route path="/relbaixa" element={<RelBaixa />} />
             <Route path="/relativosporccqtd" element={<AtivosPorCentroCustoQtd />} />

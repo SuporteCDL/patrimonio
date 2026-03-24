@@ -41,7 +41,7 @@ type TAtivo = {
   responsavel: string
 }
 
-export default function ConfAtivos() {
+export default function ConferirAtivos() {
   const [msg, setMsg] = useState("")
   const [listLocalidades, setListLocalidades] = useState<ILocalidade[]>([])
   const [listCentroCustos, setListCentroCustos] = useState<ICentroCusto[]>([])
@@ -62,7 +62,7 @@ export default function ConfAtivos() {
   })
 
   async function buscarCodigo(form: TSearch) {
-    const codigo = ZeroLeft(String(form.codigo), 6)
+    const codigo = ZeroLeft(String(form.codigo), 5)
     const response = await api.get(`ativos/buscaativo/${codigo}`)
     if (response.data[0]) {
       setMsg("")

@@ -22,3 +22,22 @@ export function formatDateForDB(date: Date) {
   return `${ano}-${mes}-${dia} ${horas}:${minutos}:${segundos}.${milissegundos}`
 }
 
+//===========================================
+export function formatDateForDBShort(date: Date) {
+  const ano = date.getFullYear()
+  const mes = String(date.getMonth() + 1).padStart(2, "0") // Janeiro = 0
+  const dia = String(date.getDate()).padStart(2, "0")
+
+  return `${ano}-${mes}-${dia}`
+}
+
+//===========================================
+export function parseDateOnly(dateString: string) {
+  const date = new Date(dateString)
+
+  return new Date(
+    date.getUTCFullYear(),
+    date.getUTCMonth(),
+    date.getUTCDate()
+  )
+}

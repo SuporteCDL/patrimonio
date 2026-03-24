@@ -9,7 +9,7 @@ import { Select,
 import { Label } from "@/components/ui/label";
 import { Switch } from '@/components/ui/switch'
 import { api } from "@/lib/axios";
-import { ILocalidade } from "@/lib/interface";
+import { IConferencia, ILocalidade } from "@/lib/interface";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
 type TAtivosConferencia = {
@@ -28,9 +28,11 @@ export default function RelConferir() {
   const [msg, setMsg] = useState("")
   let cont = 0
   const [listLocalidades, setListLocalidades] = useState<ILocalidade[]>([])
+  const [conferencias, setConferencias] = useState<IConferencia[]>([])
   const [listAtivosConferencia, setListAtivosConferencia] = useState<TAtivosConferencia[]>([])
   const [encontrado, setEncontrado] = useState(false)
   const [localidade, setLocalidade] = useState("");
+  const [conferencia, setConferencia] = useState("");
   const [ordem, setOrdem] = useState('0')
 
   async function listaLocalidades() {
@@ -40,9 +42,16 @@ export default function RelConferir() {
     }
   }
 
+  async function listaConferencias() {
+    const response = await api.get('conferencia')
+    if (response.data) {
+      setConferencias(response.data)
+    }
+  }
+
   async function buscarAtivo() {
     event?.preventDefault()
-    const response = await api.get(`ativos/ativosconferencia?encontrado=${encontrado}&codlocalidade=${localidade}&ordem=${ordem}`)
+    const response = await api.get(`ativos/ativosconferencia?encontrado=${encontrado}&conferenciaid=${conferencia}&codlocalidade=${localidade}&ordem=${ordem}`)
     if (response.data[0]) {
       setListAtivosConferencia(response.data)
       setMsg("")
@@ -53,6 +62,7 @@ export default function RelConferir() {
   
   useEffect(() => {
     listaLocalidades()
+    listaConferencias()
   },[])
 
   return (
@@ -70,6 +80,24 @@ export default function RelConferir() {
               <SelectGroup>
                 {
                   listLocalidades.map(item => (
+                    <SelectItem key={item.id} value={String(item.id)}>{item.descricao}</SelectItem>
+                  ))
+                }
+              </SelectGroup>
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div className="flex flex-row items-center w-84 gap-3">
+          <Label htmlFor="codigo" className="text-xl lg:text-lg">Conferência:</Label>
+          <Select value={conferencia} onValueChange={setConferencia}>
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="Selecione..." />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectGroup>
+                {
+                  conferencias.map(item => (
                     <SelectItem key={item.id} value={String(item.id)}>{item.descricao}</SelectItem>
                   ))
                 }

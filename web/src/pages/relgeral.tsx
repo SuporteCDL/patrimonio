@@ -20,7 +20,6 @@ type TAtivosConferencia = {
   ativo: string
   status: string
   marca: string
-  encontrado: boolean
   motivo_baixa: string
 }
 
@@ -28,14 +27,13 @@ export default function RelGeral() {
   const [msg, setMsg] = useState("")
   let cont = 0
   const [listAtivosConferencia, setListAtivosConferencia] = useState<TAtivosConferencia[]>([])
-  const [encontrado, setEncontrado] = useState(false)
   const [baixado, setBaixado] = useState(false)
   const [ordem, setOrdem] = useState('0')
 
   async function buscarAtivo() {
     event?.preventDefault()
     const status = baixado ? 'Baixado' : 'Incluido'
-    const response = await api.get(`ativos/ativosgeral?encontrado=${encontrado}&status=${status}&ordem=${ordem}`)
+    const response = await api.get(`ativos/ativosgeral?status=${status}&ordem=${ordem}`)
     if (response.data[0]) {
       setListAtivosConferencia(response.data)
       setMsg("")
@@ -76,16 +74,6 @@ export default function RelGeral() {
         <Label htmlFor="baixado">{baixado ? "Sim" : "Não"}</Label>
         </div>
 
-        <div className="flex flex-row items-center w-64 gap-3">      
-        <label className="font-semibold">ENCONTRADO?</label>
-        <Switch 
-          id="encontrado" 
-          checked={encontrado}
-          onCheckedChange={(value) => setEncontrado(value)}
-        />
-        <Label htmlFor="encontrado">{encontrado ? "Sim" : "Não"}</Label>
-        </div>
-        
         <Button 
           className="w-40 h-10 text-2xl lg:h-10 lg:text-lg"
           variant="default" 
@@ -113,7 +101,6 @@ export default function RelGeral() {
               <TableHead className="flex-1 bg-gray-100 border-b-2 border-gray-300">Descrição</TableHead>
               <TableHead className="bg-gray-100 border-b-2 border-gray-300 print:hidden"></TableHead>
               <TableHead className="bg-gray-100 border-b-2 border-gray-300 print:hidden">Marca</TableHead>
-              <TableHead className="bg-gray-100 border-b-2 border-gray-300">Encontrado</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -132,7 +119,6 @@ export default function RelGeral() {
                   <TableCell className="w-10"></TableCell>
                 }
                 <TableCell className="w-10 print:hidden">{item.marca}</TableCell>
-                <TableCell className="w-10 text-center">{item.encontrado ? 'Sim' : 'Não'}</TableCell>
               </TableRow>
             )})}
           </TableBody>

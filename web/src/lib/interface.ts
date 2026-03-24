@@ -75,3 +75,21 @@ export interface IUsuario {
   email: string;
   password: string;
 }
+
+export interface IConferencia {
+  id: number
+  descricao: string
+  data_inicio: Date
+  data_fim: Date
+  responsavel: string
+  status: string
+}
+
+export interface IConferenciaItem {
+  id: number
+  conferencia_id: number
+  patrimonio_id: number
+  encontrado: boolean
+  observacao?: string | undefined
+  data_verificacao?: Date | undefined
+}

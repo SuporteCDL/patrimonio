@@ -86,6 +86,8 @@ export default function FrmAtivo({ isModalOpen, isEditting, ativo, listAtivos }:
   const [centroCusto, setCentroCusto] = useState<ICentroCusto[]>([])
   const [marcas, setMarcas] = useState<IMarca[]>([])
   const [open, setOpen] = useState(false)
+  const [isContinue, setIsContinue] = useState(false)
+  const [statusContinuar, setStatusContinuar] = useState("Não")
   const [dataAquisicao, setDataAquisicao] = useState<Date | undefined>(
     ativo?.aquisicao ? new Date(ativo.aquisicao.replace(" ", "T")) : undefined
   )
@@ -178,7 +180,7 @@ export default function FrmAtivo({ isModalOpen, isEditting, ativo, listAtivos }:
     } else {
       await api.post('ativos', dados, config)
       alert(`Novo Ativo incluído com sucesso!`)
-      isModalOpen(false)
+      isContinue ? isModalOpen(true) : isModalOpen(false) 
       listAtivos(Number(ativo?.codlocalidade))
     }
   }
@@ -441,7 +443,7 @@ export default function FrmAtivo({ isModalOpen, isEditting, ativo, listAtivos }:
               )}
             />
           </div>
-          <div>
+          <div className='mb-6'>
             <FormField
               control={form.control}
               name="responsavel"
@@ -449,27 +451,32 @@ export default function FrmAtivo({ isModalOpen, isEditting, ativo, listAtivos }:
                 <FormItem>
                   <FormLabel>Responsável pela utilização do ativo:</FormLabel>
                   <FormControl>
-                    <Select
-                      onValueChange={field.onChange}
-                      value={String(field.value)}
-                      defaultValue={String(field.value)}
-                    >
-                      <SelectTrigger className="md:w-96 w-full">
-                        <SelectValue placeholder="Selecione o responsável" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value='Osmair'>Osmair</SelectItem>
-                      </SelectContent>
-                    </Select>
+                    <Input placeholder="responsavel" className='md:w-96 w-full' {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
           </div>
+
           <div className='flex flex-row gap-4'>
             <Button type="submit">Salvar</Button>
             <Button className='bg-red-500' onClick={() => isModalOpen(false)}>Fechar</Button>
+            <div className='flex flex-row justify-start items-center gap-4'>
+              <Label htmlFor="continuar">
+                Continuar cadastrando?
+              </Label>
+              <div className='flex flex-row gap-2'>
+                <Switch
+                  id="continuar"
+                  checked={isContinue}
+                  onCheckedChange={(value)=> setIsContinue(value)}
+                  onClick={() => setStatusContinuar(statusContinuar==='Não' ? "Sim" : "Não")}
+                />
+                <span>{statusContinuar}</span>
+              </div>
+            </div>
+
           </div>
         </form>
       </Form>

@@ -42,7 +42,7 @@ export default function RelBaixa() {
   
   async function loadAtivo(codAtivo: string) {
     const cod = ZeroLeft(codAtivo, 6)
-    const response = await api.get(`ativos/buscaativo/${cod}`)
+    const response = await api.get(`ativos/${cod}`)
     if (response.data) {
       setAtivo(response.data[0])
     }
