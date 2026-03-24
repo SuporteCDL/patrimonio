@@ -17,7 +17,6 @@ import {
 } from "@/components/ui/table"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Link } from "react-router-dom"
-import { AxiosRequestConfig } from "axios"
 import FrmAtivo from "@/components/forms/frmativo"
 import { Input } from "@/components/ui/input"
 

@@ -105,10 +105,10 @@ export async function getAtivosPorSubGrupo(request: FastifyRequest<{ Params: Cod
   return reply.send(ativosPorSubGrupo)
 }
 
-export async function getAtivosConferidosBaixados(request: FastifyRequest<{ Params: CodLocalidadeParam }>, reply: FastifyReply) {
+export async function getAtivosVSBaixados(request: FastifyRequest<{ Params: CodLocalidadeParam }>, reply: FastifyReply) {
   const { codlocalidade } = request.params
-  const ativosConferidosBaixados = await ativoService.ativosConferidosBaixados(codlocalidade)
-  return reply.send(ativosConferidosBaixados)
+  const ativosVSBaixados = await ativoService.ativosVSBaixados(codlocalidade)
+  return reply.send(ativosVSBaixados)
 }
 
 export async function getAtivosValoresTotais(request: FastifyRequest<{ Params: CodLocalidadeParam }>, reply: FastifyReply) {

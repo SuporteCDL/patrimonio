@@ -262,13 +262,12 @@ async function ativosPorSubGrupo(codlocalidade: number) {
   return result
 }
 
-async function ativosConferidosBaixados(codlocalidade: number) {
+async function ativosVSBaixados(codlocalidade: number) {
   const result = await db('ativos')
   .where('codlocalidade', codlocalidade)
   .select(
     db.raw(`
-      COUNT(*) FILTER (WHERE encontrado = true AND status <> 'Baixado') AS encontrados,
-      COUNT(*) FILTER (WHERE (encontrado = false OR encontrado IS NULL) AND status <> 'Baixado') AS nao_encontrados,
+      COUNT(*) FILTER (WHERE status <> 'Baixado') AS ativos,
       COUNT(*) FILTER (WHERE status = 'Baixado') AS baixados
     `)
   )
@@ -358,7 +357,7 @@ export const ativoService = {
   ativosPorCentroCustoQtd, 
   ativosPorGrupo,
   ativosPorSubGrupo,
-  ativosConferidosBaixados,
+  ativosVSBaixados,
   ativosValoresTotais,
   quantidadeAtivosPorAnoAquisicao,
   ativo,

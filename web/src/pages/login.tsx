@@ -19,8 +19,9 @@ export function Login() {
   })
 
   async function handleLogin(formData: ILogin) {
+    const baseUrl = import.meta.env.VITE_API_URL
     const {email, password} = formData
-    const response = await fetch('http://192.168.2.106:3333/usuarios/login', {
+    const response = await fetch(`${baseUrl}/usuarios/login`, {
       method: 'POST',
       body: JSON.stringify({ email, password }),
       headers: { 'Content-Type': 'application/json' },

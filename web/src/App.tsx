@@ -8,8 +8,8 @@ export default function App() {
 
   return (
     <BrowserRouter>
-      {/* {user === null ? <Login /> : <Menu /> } */}
-      <Menu />
+      {user === null ? <Login /> : <Menu /> }
+      {/* <Menu /> */}
     </BrowserRouter>
   )
 }

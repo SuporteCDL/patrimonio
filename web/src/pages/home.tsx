@@ -47,7 +47,7 @@ export default function Home() {
   const [localidades, setLocalidades] = useState<ILocalidade[]>([])
   const [totalAtivos, setTotalAtivos] = useState<TTotalAtivos>({ total: 0 })
   const [ativosPorGrupo, setAtivosPorGrupo] = useState<TAtivosPorGrupo[]>([])
-  const [ativosConferidosBaixados, setAtivosConferidosBaixados] = useState<TGrafico[]>([])
+  const [ativosVSBaixados, setAtivosVSBaixados] = useState<TGrafico[]>([])
   const [ativosValoresTotais, setAtivosValoresTotais] = useState<TAtivosValoresTotais>({
     total_aquisicao: 0,
     total_atual: 0,
@@ -82,8 +82,8 @@ export default function Home() {
     }
   }
 
-  async function AtivosConferidosBaixados() {
-    const response = await api.get(`ativos/ativosconferidosbaixados/${codlocalidade}`)
+  async function AtivosVSBaixados() {
+    const response = await api.get(`ativos/ativosvsbaixados/${codlocalidade}`)
     if (response.data) {
       const dadosTransformados = Object.entries(response.data).map(
         ([x, y]) => ({
@@ -91,7 +91,7 @@ export default function Home() {
           y: Number(y),
         })
       );
-      setAtivosConferidosBaixados(dadosTransformados)
+      setAtivosVSBaixados(dadosTransformados)
     }
   }
 
@@ -120,7 +120,7 @@ export default function Home() {
   useEffect(() => {
     TotalAtivos()
     AtivosPorGrupo()
-    AtivosConferidosBaixados()
+    AtivosVSBaixados()
     AtivosValoresTotais()
     QuantidadeAtivosPorAnoAquisicao()
     buscarQtdCentroCusto()
@@ -259,7 +259,7 @@ export default function Home() {
         </div>
 
         <div className="flex flex-col gap-2 w-1/3 p-2 border-[1px] border-gray-200 shadow-lg rounded-md">
-          <span className="font-semibold">Conferencia fisica vs cadastro</span>
+          <span className="font-semibold">Ativos x Baixados</span>
           <div className="h-48">
             <VictoryChart
               theme={VictoryTheme.clean}
@@ -274,7 +274,7 @@ export default function Home() {
               />
               <VictoryBar
                 horizontal
-                data={ativosConferidosBaixados}
+                data={ativosVSBaixados}
                 labels={({ datum }) => `${datum.x}: ${datum.y}`}
                 labelComponent={<VictoryTooltip />}
                 style={{
