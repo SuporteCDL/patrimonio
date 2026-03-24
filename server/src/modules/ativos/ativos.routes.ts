@@ -10,6 +10,7 @@ import { createAtivo,
   getAtivosPorGrupo, 
   getAtivosPorSubGrupo, 
   getAtivosValoresTotais,
+  getAtivoConferencia,
   getQuantidadeAtivosPorAnoAquisicao, 
   getTotalAtivos, 
   updateAtivo } from "./ativos.controller"
@@ -17,7 +18,9 @@ import { createAtivo,
 export async function ativosRoutes(app: FastifyInstance) {
   app.get('/', getAtivos)
 
-  app.get('/buscaativo/:codigo', getAtivo)
+  app.get('/:codigo', getAtivo)
+
+  app.get('/buscaativo/:idconferencia/:codigo', getAtivoConferencia)
   
   app.get('/ativosconferencia', getAtivosConferencia)
 

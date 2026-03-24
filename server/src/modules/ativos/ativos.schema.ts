@@ -10,12 +10,12 @@ export const ativosQuerySchema = z.object({
 
 export const ativosConferenciaQuerySchema = z.object({
   encontrado: z.string(),
+  conferenciaid: z.coerce.number().min(1, 'codigo da conferencia obrigatório'),
   codlocalidade: z.coerce.number().min(1, 'codlocalidade é obrigatório'),
   ordem: z.coerce.number()
 })
 
 export const ativosGeralQuerySchema = z.object({
-  encontrado: z.string(),
   status: z.string(),
   ordem: z.coerce.number()
 })
@@ -33,7 +33,6 @@ export const esquemaCriacaoAtivo = z.object({
   codcentrocusto: z.number(),
   codmarca: z.number(),
   motivo_baixa: z.string(),
-  encontrado: z.boolean(),
   responsavel: z.string()
 })
 

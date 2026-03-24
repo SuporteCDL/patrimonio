@@ -14,7 +14,6 @@ interface IAtivo {
   codsubgrupo: number
   codcentrocusto: number
   codmarca: number
-  encontrado: boolean
   responsavel: string
 }
 
@@ -67,7 +66,7 @@ async function listar(
   return await query
 }
 
-async function buscarAtivo(codigo: string) {
+async function ativo(codigo: string) {
   const ativo = await db('ativos')
   .join('localidades', 'ativos.codlocalidade', '=', 'localidades.id')
   .join('centro_custo', 'ativos.codcentrocusto', '=', 'centro_custo.id')
@@ -84,8 +83,42 @@ async function buscarAtivo(codigo: string) {
   return ativo
 }
 
+async function buscarAtivo(idconferencia: string, codigo: string) {
+  const ativo = await db('ativos')
+  .join('localidades', 'ativos.codlocalidade', '=', 'localidades.id')
+  .join('centro_custo', 'ativos.codcentrocusto', '=', 'centro_custo.id')
+  .join('subgrupos', 'ativos.codsubgrupo', '=', 'subgrupos.id')
+  .join('grupos', 'subgrupos.codgrupo', '=', 'grupos.id')
+  .join('marcas', 'ativos.codmarca', '=', 'marcas.id')
+  .join('conferencia_itens', 'ativos.id', '=', 'conferencia_itens.patrimonio_id')
+  .select('centro_custo.descricao as centrocusto', 
+    'localidades.descricao as localidade', 
+    'grupos.descricao as grupo', 
+    'subgrupos.descricao as subgrupo', 
+    'marcas.descricao as marca', 
+    'conferencia_itens.id as idconferenciaitem',
+    'conferencia_itens.encontrado',
+    'ativos.descricao',
+    'ativos.aquisicao',
+    'ativos.depreciacao',
+    'ativos.valor_aquisicao',
+    'ativos.valor_atual',
+    'ativos.codigo',
+    'ativos.status',
+    'ativos.motivo_baixa',
+    'ativos.codsubgrupo',
+    'ativos.codcentrocusto',
+    'ativos.codmarca',
+    'ativos.codlocalidade',
+    'ativos.id',
+    'ativos.foto',
+    'ativos.responsavel')
+  .where('conferencia_itens.conferencia_id','=',Number(idconferencia))
+  .andWhere('ativos.codigo','=',codigo)
+  return ativo
+}
+
 async function listaAtivosGeral(
-  encontrado: string,
   status: string,
   ordem?: number
 ) {
@@ -103,7 +136,6 @@ async function listaAtivosGeral(
       'ativos.descricao as ativo',
       'ativos.status',
       'marcas.descricao as marca',
-      'ativos.encontrado',
       'ativos.motivo_baixa'
     )
     if (status==='Baixado') {
@@ -111,7 +143,6 @@ async function listaAtivosGeral(
     } else {
       query.whereIn('ativos.status',['Incluido','Alterado'])
     }
-    query.andWhereRaw('ativos.encontrado=?',encontrado)
     switch (ordem) {
       case 1:
         query.orderBy('localidades.descricao', 'asc')
@@ -134,6 +165,7 @@ async function listaAtivosGeral(
 
 async function listaAtivosConferencia(
   encontrado: string,
+  conferenciaid: number,
   codlocalidade?: number,
   ordem?: number
 ) {
@@ -142,6 +174,7 @@ async function listaAtivosConferencia(
     .join('centro_custo', 'ativos.codcentrocusto', '=', 'centro_custo.id')
     .join('subgrupos', 'ativos.codsubgrupo', '=', 'subgrupos.id')
     .join('marcas', 'ativos.codmarca', '=', 'marcas.id')
+    .join('conferencia_itens', 'ativos.id', '=', 'conferencia_itens.id')
     .select(
       'ativos.id',
       'localidades.descricao as localidade',
@@ -151,11 +184,12 @@ async function listaAtivosConferencia(
       'ativos.descricao as ativo',
       'ativos.status',
       'marcas.descricao as marca',
-      'ativos.encontrado'
+      'conferencia_itens.encontrado'
     )
     // Condições opcionais
     query.where('ativos.status','<>','Baixado')
-    query.andWhereRaw('ativos.encontrado=?',encontrado)
+    query.andWhereRaw('conferencia_itens.conferencia_id=?',conferenciaid)
+    query.andWhereRaw('conferencia_itens.encontrado=?',encontrado)
     if (codlocalidade && codlocalidade > 0) {
       query.andWhere('ativos.codlocalidade', codlocalidade)
     }
@@ -281,7 +315,6 @@ async function criar(dados: Omit<IAtivo, 'id'>) {
     codsubgrupo: dados.codsubgrupo,
     codcentrocusto: dados.codcentrocusto,
     codmarca: dados.codmarca,
-    encontrado: dados.encontrado,
     responsavel: dados.responsavel
   })
   .returning('*')
@@ -304,7 +337,6 @@ async function alterar(dados: IAtivo) {
     codsubgrupo: dados.codsubgrupo,
     codcentrocusto: dados.codcentrocusto,
     codmarca: dados.codmarca,
-    encontrado: dados.encontrado,
     responsavel: dados.responsavel
   })
   .returning('*')
@@ -329,6 +361,7 @@ export const ativoService = {
   ativosConferidosBaixados,
   ativosValoresTotais,
   quantidadeAtivosPorAnoAquisicao,
+  ativo,
   buscarAtivo,
   criar, 
   alterar, 

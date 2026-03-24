@@ -7,6 +7,7 @@ interface UpdateAtivoParam {
 }
 
 interface CodigoAtivoParam {
+  idconferencia: string
   codigo: string
 }
 
@@ -37,7 +38,18 @@ export async function getAtivo(request: FastifyRequest<{ Params: CodigoAtivoPara
       error: 'Código não informado',
     })
   }
-  const buscaAtivo = await ativoService.buscarAtivo(codigo)
+  const buscaAtivo = await ativoService.ativo(codigo)
+  return reply.send(buscaAtivo)
+}
+
+export async function getAtivoConferencia(request: FastifyRequest<{ Params: CodigoAtivoParam }>, reply: FastifyReply) {
+  const { idconferencia, codigo } = request.params
+  if (!codigo) {
+    return reply.status(400).send({
+      error: 'Código não informado',
+    })
+  }
+  const buscaAtivo = await ativoService.buscarAtivo(idconferencia, codigo)
   return reply.send(buscaAtivo)
 }
 
@@ -46,9 +58,8 @@ export async function getAtivosGeral(request: FastifyRequest, reply: FastifyRepl
   if (!parseResult.success) {
     return reply.status(400).send({ error: parseResult.error })
   }
-  const { encontrado, status, ordem } = parseResult.data
+  const { status, ordem } = parseResult.data
   const ativos = await ativoService.listaAtivosGeral(
-    encontrado,
     status,
     ordem
   )
@@ -60,9 +71,10 @@ export async function getAtivosConferencia(request: FastifyRequest, reply: Fasti
   if (!parseResult.success) {
     return reply.status(400).send({ error: parseResult.error })
   }
-  const { codlocalidade, encontrado, ordem } = parseResult.data
+  const { codlocalidade, conferenciaid, encontrado, ordem } = parseResult.data
   const ativos = await ativoService.listaAtivosConferencia(
     encontrado,
+    conferenciaid,
     codlocalidade,
     ordem
   )
