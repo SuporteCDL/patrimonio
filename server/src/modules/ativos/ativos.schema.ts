@@ -17,6 +17,8 @@ export const ativosConferenciaQuerySchema = z.object({
 
 export const ativosGeralQuerySchema = z.object({
   status: z.string(),
+  codlocalidade: z.string().optional(),
+  codcentrocusto: z.string().optional(),
   ordem: z.coerce.number()
 })
 

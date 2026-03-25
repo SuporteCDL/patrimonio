@@ -120,6 +120,8 @@ async function buscarAtivo(idconferencia: string, codigo: string) {
 
 async function listaAtivosGeral(
   status: string,
+  codlocalidade?: string,
+  codcentrocusto?: string,
   ordem?: number
 ) {
   const query = db('ativos')
@@ -142,6 +144,12 @@ async function listaAtivosGeral(
       query.where('ativos.status','=',status)
     } else {
       query.whereIn('ativos.status',['Incluido','Alterado'])
+    }
+    if (codlocalidade !== '0') {
+      query.andWhere('codlocalidade','=',Number(codlocalidade))
+    }
+    if (codcentrocusto !== '0') {
+      query.andWhere('codcentrocusto','=',Number(codcentrocusto))
     }
     switch (ordem) {
       case 1:

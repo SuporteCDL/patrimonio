@@ -56,6 +56,7 @@ export default function RelConferir() {
       setListAtivosConferencia(response.data)
       setMsg("")
     } else {
+      setListAtivosConferencia([])
       setMsg(`Não encontrado`)
     }
   }
@@ -69,7 +70,7 @@ export default function RelConferir() {
     <div className="w-full h-full overflow-auto">
       <h1 className="text-2xl lg:text-lg font-bold text-left mb-4">Conferência de Ativos</h1>
 
-      <form name="frm" onSubmit={buscarAtivo} className="flex flex-row gap-4 justify-start items-center">
+      <form name="frm" onSubmit={buscarAtivo} className="flex flex-row gap-4 justify-start items-center mb-4">
         <div className="flex flex-row items-center w-64 gap-3">
           <Label htmlFor="codigo" className="text-xl lg:text-lg">Local:</Label>
           <Select value={localidade} onValueChange={setLocalidade}>
@@ -140,51 +141,53 @@ export default function RelConferir() {
           Listar
         </Button>
       </form>
-        {msg !== "" && <span className="w-full text-red-600">{msg}</span>}
+      
+      {msg !== "" ? 
+        <div className="w-full text-red-600 text-center  p-2 border border-red-100 rounded bg-red-50">{msg}</div>
+        :
+        <div id="print-area" className="w-[450px] lg:w-full">
+          <div className="flex flex-row justify-between items-center py-4">
+            <h2 className="font-semibold text-xl lg:text-lg">Lista de Ativos</h2>
+            <Button variant="default" onClick={() => window.print()}>
+              Imprimir
+            </Button>
+          </div>
 
-      <div id="print-area" className="mt-4 w-[450px] lg:w-full">
-        <div className="flex flex-row justify-between items-center py-4">
-          <h2 className="font-semibold text-xl lg:text-lg">Lista de Ativos</h2>
-          <Button variant="default" onClick={() => window.print()}>
-            Imprimir
-          </Button>
-        </div>
-
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead className="bg-gray-100 border-b-2 border-gray-300 print:hidden">Localidade</TableHead>
-              <TableHead className="bg-gray-100 border-b-2 border-gray-300">Centro de Custo</TableHead>
-              <TableHead className="bg-gray-100 border-b-2 border-gray-300 print:hidden">Sub-Grupo</TableHead>
-              <TableHead className="bg-gray-100 border-b-2 border-gray-300">Codigo</TableHead>
-              <TableHead className="flex-1 bg-gray-100 border-b-2 border-gray-300">Descrição</TableHead>
-              <TableHead className="bg-gray-100 border-b-2 border-gray-300">Marca</TableHead>
-              <TableHead className="bg-gray-100 border-b-2 border-gray-300 print:hidden">Encontrado</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {listAtivosConferencia.map((item, index) => {
-              cont = index
-              return (
-              <TableRow key={item.id} className={index % 2 === 0 ? 'bg-gray-50' : 'bg-gray-200'}>
-                <TableCell className="w-28 print:hidden">{item.localidade}</TableCell>
-                <TableCell className="w-44">{item.centrocusto}</TableCell>
-                <TableCell className="w-48 print:hidden">{item.subgrupo}</TableCell>
-                <TableCell className="w-10">{item.codigo}</TableCell>
-                <TableCell className="flex-1">{item.ativo}</TableCell>
-                <TableCell className="w-10">{item.marca}</TableCell>
-                <TableCell className="w-10 text-center print:hidden">{item.encontrado ? 'Sim' : 'Não'}</TableCell>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="bg-gray-100 border-b-2 border-gray-300 print:hidden">Localidade</TableHead>
+                <TableHead className="bg-gray-100 border-b-2 border-gray-300">Centro de Custo</TableHead>
+                <TableHead className="bg-gray-100 border-b-2 border-gray-300 print:hidden">Sub-Grupo</TableHead>
+                <TableHead className="bg-gray-100 border-b-2 border-gray-300">Codigo</TableHead>
+                <TableHead className="flex-1 bg-gray-100 border-b-2 border-gray-300">Descrição</TableHead>
+                <TableHead className="bg-gray-100 border-b-2 border-gray-300">Marca</TableHead>
+                <TableHead className="bg-gray-100 border-b-2 border-gray-300 print:hidden">Encontrado</TableHead>
               </TableRow>
-            )})}
-          </TableBody>
-          <TableRow>
-            <TableCell colSpan={7}>
-              Total de registros: {cont > 0 ? cont + 1 : cont}
-            </TableCell>
-          </TableRow>
-        </Table>
-
-      </div>
+            </TableHeader>
+            <TableBody>
+              {listAtivosConferencia.map((item, index) => {
+                cont = index
+                return (
+                <TableRow key={item.id} className={index % 2 === 0 ? 'bg-gray-50' : 'bg-gray-200'}>
+                  <TableCell className="w-28 print:hidden">{item.localidade}</TableCell>
+                  <TableCell className="w-44">{item.centrocusto}</TableCell>
+                  <TableCell className="w-48 print:hidden">{item.subgrupo}</TableCell>
+                  <TableCell className="w-10">{item.codigo}</TableCell>
+                  <TableCell className="flex-1">{item.ativo}</TableCell>
+                  <TableCell className="w-10">{item.marca}</TableCell>
+                  <TableCell className="w-10 text-center print:hidden">{item.encontrado ? 'Sim' : 'Não'}</TableCell>
+                </TableRow>
+              )})}
+            </TableBody>
+            <TableRow>
+              <TableCell colSpan={7}>
+                Total de registros: {cont > 0 ? cont + 1 : cont}
+              </TableCell>
+            </TableRow>
+          </Table>
+        </div>
+      }
     </div>
   )
 }

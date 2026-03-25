@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Select, 
   SelectContent,
@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Switch } from '@/components/ui/switch'
 import { api } from "@/lib/axios";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { ICentroCusto, ILocalidade } from "@/lib/interface";
 
 type TAtivosConferencia = {
   id: number
@@ -27,13 +28,31 @@ export default function RelGeral() {
   const [msg, setMsg] = useState("")
   let cont = 0
   const [listAtivosConferencia, setListAtivosConferencia] = useState<TAtivosConferencia[]>([])
+  const [listLocalidades, setListLocalidades] = useState<ILocalidade[]>([])
+  const [listCentroCusto, setListCentroCusto] = useState<ICentroCusto[]>([])
+  const [localidade, setLocalidade] = useState("0");
+  const [centroCusto, setCentroCusto] = useState("0");
   const [baixado, setBaixado] = useState(false)
   const [ordem, setOrdem] = useState('0')
+
+  async function listaLocalidades() {
+    const response = await api.get('localidades')
+    if (response.data) {
+      setListLocalidades(response.data)
+    }
+  }
+
+  async function listaCentroCusto() {
+    const response = await api.get('centrocusto')
+    if (response.data) {
+      setListCentroCusto(response.data)
+    }
+  }
 
   async function buscarAtivo() {
     event?.preventDefault()
     const status = baixado ? 'Baixado' : 'Incluido'
-    const response = await api.get(`ativos/ativosgeral?status=${status}&ordem=${ordem}`)
+    const response = await api.get(`ativos/ativosgeral?status=${status}&codlocalidade=${localidade}&codcentrocusto=${centroCusto}&ordem=${ordem}`)
     if (response.data[0]) {
       setListAtivosConferencia(response.data)
       setMsg("")
@@ -42,11 +61,52 @@ export default function RelGeral() {
     }
   }
   
+  useEffect(() => {
+    listaLocalidades()
+    listaCentroCusto()
+  },[])
+
   return (
     <div className="w-full h-full overflow-auto">
       <h1 className="text-2xl lg:text-lg font-bold text-left mb-4">Ativos em Geral</h1>
 
       <form name="frm" onSubmit={buscarAtivo} className="flex flex-row gap-4 justify-start items-center">
+        <div className="flex flex-row items-center w-64 gap-3">
+          <Label htmlFor="codigo" className="text-xl lg:text-lg">Local:</Label>
+          <Select value={localidade} onValueChange={setLocalidade}>
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="Selecione..." />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectGroup>
+                {
+                  listLocalidades.map(item => (
+                    <SelectItem key={item.id} value={String(item.id)}>{item.descricao}</SelectItem>
+                  ))
+                }
+              </SelectGroup>
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div className="flex flex-row items-center w-96 gap-3">
+          <Label htmlFor="codigo" className="text-xl lg:text-lg">Centro de Custo:</Label>
+          <Select value={centroCusto} onValueChange={setCentroCusto}>
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="Todos" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectGroup>
+                {
+                  listCentroCusto.map(item => (
+                    <SelectItem key={item.id} value={String(item.id)}>{item.descricao}</SelectItem>
+                  ))
+                }
+              </SelectGroup>
+            </SelectContent>
+          </Select>
+        </div>
+
         <div className="flex flex-row items-center w-96 gap-3">
           <Label htmlFor="codigo" className="text-xl lg:text-lg">Ordem:</Label>
           <Select value={ordem} onValueChange={setOrdem}>

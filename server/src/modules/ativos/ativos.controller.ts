@@ -58,9 +58,11 @@ export async function getAtivosGeral(request: FastifyRequest, reply: FastifyRepl
   if (!parseResult.success) {
     return reply.status(400).send({ error: parseResult.error })
   }
-  const { status, ordem } = parseResult.data
+  const { codlocalidade, codcentrocusto, status, ordem } = parseResult.data
   const ativos = await ativoService.listaAtivosGeral(
     status,
+    codlocalidade,
+    codcentrocusto,
     ordem
   )
   return reply.send(ativos)

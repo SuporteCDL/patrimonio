@@ -30,8 +30,8 @@ export function Login() {
     if (response.ok) {
       login(data.usuario); 
     } else {
-      setErroSenha(data.message)
-      alert(data.message);
+      setErroSenha(`Ocorreu um erro ao tentar logar: ${data.message}`)
+      // alert("Ocorreu um erro ao tentar logar.");
     }
   }
 
@@ -76,11 +76,11 @@ export function Login() {
             placeholder="*****"
           />
           {erroSenha && (
-            <span className="text-red-400 italic text-2xl">{erroSenha}</span>
+            <span className="text-red-400 italic text-md">{erroSenha}</span>
           )}
         </div>
 
-        <div className="flex justify-center items-center gap-2 mt-2 text-sm">
+        {/* <div className="flex justify-center items-center gap-2 mt-2 text-sm">
           <Link to="/signup" className="font-semibold hover:text-cyan-600 text-4xl lg:text-lg">
             Não tenho cadastro
           </Link>{" "}
@@ -88,7 +88,7 @@ export function Login() {
           <Link to="/forgot" className="font-semibold hover:text-cyan-600 text-4xl lg:text-lg">
             Esqueci a senha
           </Link>
-        </div>
+        </div> */}
 
         <button
           type="submit"
