@@ -95,11 +95,11 @@ export default function Menu() {
               </MenubarContent>
             </MenubarMenu>
 
-            {/* <MenubarMenu>
+            <MenubarMenu>
               <MenubarTrigger asChild className="text-2xl lg:text-lg">
-                <Link to='conferirativos'>Conferir Ativos</Link>
+                <Link to='movativos'>Movimentações de Ativos</Link>
               </MenubarTrigger>
-            </MenubarMenu> */}
+            </MenubarMenu>
             
             <MenubarMenu>
               <MenubarTrigger className="text-2xl lg:text-lg">Relatórios</MenubarTrigger>

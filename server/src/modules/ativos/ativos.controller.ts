@@ -142,7 +142,7 @@ export async function updateAtivo(request: FastifyRequest, reply: FastifyReply) 
   if (!parsed.success) {
     return reply.status(400).send({
       error: 'Erro de validação',
-      details: parsed.error.format(),
+      details: parsed.error.format,
     })
   }
   const ativoAtualizado = await ativoService.alterar(parsed.data)

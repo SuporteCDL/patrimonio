@@ -1,224 +1,321 @@
-import { useEffect, useState } from 'react'
-import { FiSearch } from 'react-icons/fi'
-import { useForm } from 'react-hook-form'
-import { z } from 'zod'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { api } from '@/lib/axios'
-import { ZeroLeft } from '@/utils/functions' 
-import ReactModal from 'react-modal'
-// import Notes from '@/app/components/notes'
-import { IAtivoJoin, ICentroCusto } from '@/lib/interface'
+import { api } from "@/lib/axios"
+import { ICentroCusto, IConferencia, ILocalidade, IMarca, ISubGrupo } from "@/lib/interface"
+import { useEffect, useState } from "react"
+import { useForm } from "react-hook-form"
+import { useParams } from "react-router-dom"
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Select, 
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue, } from "@/components/ui/select";
+  import { Label } from "@/components/ui/label";
+  import { Switch } from '@/components/ui/switch'
+  import { formatDateForDBShort, ZeroLeft } from "@/utils/functions"
+import { AxiosRequestConfig } from "axios"
 
-const schema = z.object({
-  codigoAtivo: z
-    .string()
-    .min(2, { message: 'É necesário informar no mínimo 2 caracteres' }),
-})
-
-type SearchProps = {
-  codigoAtivo: string
+type TSearch = {
+  codigo: string;
+}
+type TAtivo = {
+  id: number
+  idconferenciaitem: number
+  codlocalidade: number
+  codigo: string
+  status: string
+  motivo_baixa: string
+  descricao: string
+  aquisicao: string
+  valor_aquisicao: number
+  valor_atual: number
+  depreciacao: number
+  codsubgrupo: number
+  codcentrocusto: number
+  codmarca: number
+  encontrado: boolean
+  localidade: string
+  centrocusto: string
+  grupo: string
+  subgrupo: string
+  marca: string
+  responsavel: string
 }
 
 export default function MovAtivos() {
-  const [isNoteOpen, setIsNoteOpen] = useState(false)
-  const [found, setFound] = useState(false)
-  const [textFound, setTextFound] = useState('Não')
-  const [codigo, setCodigo] = useState('')
-  const [centroCustos, setCentroCustos] = useState<ICentroCusto[]>([])
-  const [search, setSeach] = useState<IAtivoJoin>()
-  const [listStatus, setListStatus] = useState<string[]>([
-    'Incluido',
-    'Alterado',
-    'Baixado',
-  ])
-  const {
-    handleSubmit,
-    register,
-    reset,
-    formState: { errors },
-  } = useForm<SearchProps>({
-    resolver: zodResolver(schema),
+  const { id } = useParams()
+  const [conferencia, setConferencia] = useState<IConferencia>({} as IConferencia)
+  const [msg, setMsg] = useState("")
+  const [listLocalidades, setListLocalidades] = useState<ILocalidade[]>([])
+  const [listCentroCustos, setListCentroCustos] = useState<ICentroCusto[]>([])
+  const [listSubGrupos, setListSubGrupos] = useState<ISubGrupo[]>([])
+  const [listMarcas, setListMarcas] = useState<IMarca[]>([])
+  const [localidade, setLocalidade] = useState("");
+  const [centroCusto, setCentroCusto] = useState("");
+  const [status, setStatus] = useState("");
+  const [subGrupo, setSubGrupo] = useState("");
+  const [marca, setMarca] = useState("");
+  const [encontrado, setEncontrado] = useState(false)
+  const [motivoBaixa, setMotivoBaixa] = useState("")
+  const [ativo, setAtivo] = useState<TAtivo>({} as TAtivo)
+  const { handleSubmit, reset, register, formState:{errors}, setValue } = useForm<TSearch>({
+    defaultValues:{
+      codigo: ""
+    }
   })
 
-  async function LoadCentroCusto() {
-    const response = await api.get('centrocusto')
-    setCentroCustos(response.data)
-  }
+  // async function loadConferencia(id:number) {
+  //   const response = await api.get(`conferencia/${id}`)
+  //   if (response.data) {
+  //     setConferencia(response.data)
+  //   }
+  // }
 
-  async function loadSeach(codigo: string) {
+  async function buscarCodigo(form: TSearch) {
+    const codigo = ZeroLeft(String(form.codigo), 6)
     const response = await api.get(`ativos/${codigo}`)
-    const fd = document.getElementById('encontrado') as HTMLInputElement
-    if(response.data.encontrado === true) {
-      setTextFound('Sim')
-      fd.checked = true
+    if (response.data[0]) {
+      console.log(response.data[0])
+      setMsg("")
+      setAtivo(response.data[0])
+      setEncontrado(Boolean(response.data[0]?.encontrado))
+      setLocalidade(String(response.data[0]?.codlocalidade))
+      setCentroCusto(String(response.data[0]?.codcentrocusto))
+      setStatus(String(response.data[0]?.status))
+      setSubGrupo(String(response.data[0]?.codsubgrupo))
+      setMarca(String(response.data[0]?.codmarca))
+      setMotivoBaixa(String(response.data[0]?.motivo_baixa))
     } else {
-      setTextFound('Não')
-      fd.checked = false
+      setMsg(`Codigo ( ${codigo} ) não encontrado`)
     }
-    setSeach(response.data)
-  }
-
-  function handleTurnFound() {
-    const fd = document.getElementById('encontrado') as HTMLInputElement
-    fd.checked ? setTextFound('Sim') : setTextFound('Não')
-    setFound(!found)
-  }
-
-  async function handleUpdate(id: number) {
-    const st = document.getElementById('status') as HTMLInputElement
-    const cc = document.getElementById('centrocusto') as HTMLInputElement
-    const fd = document.getElementById('encontrado') as HTMLInputElement
-    const data = {
-      id,
-      status: st.value,
-      codcentrocusto: Number(cc.value),
-      encontrado: fd.checked,
-      motivo_baixa: ''
-    }
-    await api.put('ativos', data)
-    alert('Ativo atualizado com sucesso!')
-  }
-
-  function handleSearch(data: SearchProps) {
-    const codigoFormatado = ZeroLeft(data.codigoAtivo, 6)
-    setCodigo(codigoFormatado)
     reset()
   }
 
-  function handleOpenNote() {
-    setIsNoteOpen(true)
+  async function atualiza() {
+    const config: AxiosRequestConfig = {
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    }
+    event?.preventDefault()
+    const dadosAtualizacao = {
+      id: ativo.id,
+      codlocalidade: Number(localidade),
+      codigo: ativo.codigo,
+      status: status,
+      motivo_baixa: String(motivoBaixa),
+      descricao: ativo.descricao,
+      aquisicao: ativo.aquisicao,
+      valor_aquisicao: ativo.valor_aquisicao,
+      valor_atual: ativo.valor_atual,
+      depreciacao: ativo.depreciacao,
+      codsubgrupo: Number(subGrupo),
+      codcentrocusto: Number(centroCusto),
+      codmarca: Number(marca),
+      responsavel: ativo.responsavel ? String(ativo.responsavel) : ''
+    }
+    try {
+      await api.put('ativos', dadosAtualizacao, config)
+
+      alert('Ativo atualizado com sucesso!')
+    } catch (error: any) {
+      console.error(error)
+      alert(error?.response?.data?.message || 'Erro ao atualizar')
+    }
   }
 
-  function handleCloseNote() {
-    setIsNoteOpen(false)
+  async function listaLocalidades() {
+    const response = await api.get('localidades')
+    if (response.data) {
+      setListLocalidades(response.data)
+    }
   }
 
+  async function listaCentroCusto() {
+    const response = await api.get('centrocusto')
+    if (response.data) {
+      setListCentroCustos(response.data)
+    }
+  }
+
+  async function listaSubGrupo() {
+    const response = await api.get('subgrupos')
+    if (response.data) {
+      setListSubGrupos(response.data)
+    }
+  }
+
+  async function listaMarca() {
+    const response = await api.get('marcas')
+    if (response.data) {
+      setListMarcas(response.data)
+    }
+  }
+  
   useEffect(() => {
-    loadSeach(codigo)
-    LoadCentroCusto()
-  }, [codigo])
+    listaLocalidades()
+    listaCentroCusto()
+    listaSubGrupo()
+    listaMarca()
+  },[id])
 
   return (
-    <div className='w-full h-screen overflow-y-auto bg-white'>
-      <div className='pl-3'>
-        <form
-          onSubmit={handleSubmit(handleSearch)}
-          className="flex flex-row justify-start items-center gap-2"
-        >
-          <label htmlFor="codigoAtivo">Código do Ativo:</label>
-          <input
-            className="border-[1px] w-28 border-gray-300 pr-2 rounded p-2 bg-gray-100"
-            autoFocus={true}
-            type="number"
-            pattern="[0-9]*"
-            id="codigoAtivo"
-            placeholder="0000001"
-            {...register('codigoAtivo')}
-          />
-          <button type="submit">
-            <FiSearch name="search" size={32} />
-          </button>
-          {errors.codigoAtivo && (
-            <span className="text-red-500 font-light italic">
-              {errors.codigoAtivo.message}
-            </span>
-          )}
-        </form>
+    <div className="w-full h-full overflow-auto">
+      <h1 className="text-2xl lg:text-lg font-bold text-left mb-8">
+        Movimentação de Ativos
+      </h1>
 
-        <div className="mt-4">
-          {
-            <table className="w-auto">
-              <tr>
-                <td className="pr-2 font-semibold">CODIGO:</td>
-                <td className="pl-2">{search?.codigo}</td>
-              </tr>
-              <tr>
-                <td className="pr-2 font-semibold">CENTRO DE CUSTO:</td>
-                <td className="pl-2">
-                  <select
-                    id="centrocusto"
-                    className="p-2 w-full md:w-96 rounded border-[1px] border-gray-300 bg-gray-200"
-                  >
-                    <option value={0}>Selecione..</option>
-                    {centroCustos.map((cc) => (
-                      <option key={cc.id} value={cc.id}>
-                        {cc.descricao}
-                      </option>
-                    ))}
-                  </select>
-                </td>
-              </tr>
-              <tr>
-                <td className="pr-2 font-semibold">SUB-GRUPO:</td>
-                <td className="pl-2">{search?.subgrupo}</td>
-              </tr>
-              <tr>
-                <td className="pr-2 font-semibold">DESCRIÇÃO:</td>
-                <td className="pl-2">
-                  {search?.descricao}
-                </td>
-              </tr>
-              <tr>
-                <td className="pr-2 font-semibold">STATUS:</td>
-                <td className="pl-2">
-                  <select
-                    id="status"
-                    className="p-2 w-full md:w-96 rounded border-[1px] border-gray-300 bg-gray-200"
-                  >
-                    <option value="">Selecione..</option>
-                    {listStatus.map((ls) => {
-                      if (search?.status === ls) {
-                        return (
-                          <option selected key={ls} value={ls}>
-                            {ls}
-                          </option>
-                        )
-                      } else {
-                        return (
-                          <option key={ls} value={ls}>
-                            {ls}
-                          </option>
-                        )
-                      }
-                    })}
-                  </select>
-                </td>
-              </tr>
-              <tr>
-                <td className='pr-2 font-semibold'>ENCONTRADO NO LOCAL?</td>
-                <td className='pl-2'>
-                  <input 
-                    type='checkbox' 
-                    id='encontrado' 
-                    name='encontrado' 
-                    onChange={handleTurnFound} 
-                  />
-                  <label htmlFor='encontrado' className='pl-2'>{textFound}</label>
-                </td>
-              </tr>
-            </table>
-          }
-          <div className='flex flex-col lg:flex-row lg:gap-2'>
-            <button
-              onClick={() => handleUpdate(Number(search?.id))}
-              className="mt-4 p-2 rounded text-white w-full lg:w-52 bg-green-600 hover:bg-green-500"
-            >
-              Alterar
-            </button>
+      <form name="frmSearch" 
+        onSubmit={handleSubmit(buscarCodigo)} 
+        className="flex flex-row gap-4 justify-start items-center "
+      >
+        <Label htmlFor="codigo" className="text-lg">Código:</Label>
+        <Input
+          className="w-40 h-10 lg:h-10 text-lg lg:text-lg placeholder:text-xl lg:placeholder:text-lg border-2 border-black lg:border-[1px] rounded-lg lg:rounded-sm"
+          placeholder="999999"
+          {...register('codigo')}
+          autoFocus
+          type="number"
+          pattern="[0-9]*"
+        />
+        <Button 
+          className="w-40 h-10 text-2xl lg:h-10 lg:text-lg"
+          variant="default" 
+          type="submit">
+          Buscar
+        </Button>
+      </form>
+      {msg !== "" && <span className="w-full text-red-600">{msg}</span>}
 
-            <button
-              onClick={handleOpenNote}
-              className="mt-4 p-2 rounded text-white w-full lg:w-52 bg-yellow-600 hover:bg-yellow-500"
-            >
-              Anotações
-            </button>
+      <div className="mt-4 w-[450px] lg:w-1/3">
+        <h2 className="font-semibold text-xl lg:text-lg">Dados do ativo:</h2>
+        <form name="frmAtualizacao" className="flex flex-col w-full h-full p-2 gap-1 scroll-auto">
+          
+          <div className="flex flex-row gap-2">
+            <label className="font-semibold w-32 text-sm">LOCAL:</label>
+            <Select value={localidade} onValueChange={setLocalidade}>
+              <SelectTrigger className="w-60">
+                <SelectValue placeholder="Selecione..." />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectGroup>
+                  {
+                    listLocalidades.map(item => (
+                      <SelectItem key={item.id} value={String(item.id)}>{item.descricao}</SelectItem>
+                    ))
+                  }
+                </SelectGroup>
+              </SelectContent>
+            </Select>
           </div>
-        </div>
 
-        {/* <ReactModal isOpen={isNoteOpen} onRequestClose={handleCloseNote}>
-          <Notes handleClose={handleCloseNote} />
-        </ReactModal> */}
+          <div className="flex flex-row gap-2">
+            <label className="font-semibold w-32 text-sm">CÓDIGO:</label>
+            <span >{ativo?.codigo}</span>
+          </div>
 
+          <div className="flex flex-row gap-2 items-center">
+            <label className="font-semibold w-32 text-sm">DESCRIÇÃO:</label>
+            <input
+              name="descricao"
+              className="h-8 pl-2 border-[1px] w-60 border-gray-300 rounded" 
+              type="text"
+              value={ativo?.descricao}
+              onChange={(e) => setAtivo({ ...ativo, descricao: e.target.value })}
+            />
+          </div>
+
+          <div className="flex flex-row gap-2 items-center">
+            <label className="font-semibold w-32 text-sm">CENTRO DE CUSTO:</label>
+            <Select value={centroCusto} onValueChange={setCentroCusto}>
+              <SelectTrigger className="w-60">
+                <SelectValue placeholder="Selecione..." />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectGroup>
+                  {
+                    listCentroCustos.map(item => (
+                      <SelectItem key={item.id} value={String(item.id)}>{item.descricao}</SelectItem>
+                    ))
+                  }
+                </SelectGroup>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="flex flex-row gap-2 items-center">
+            <label className="font-semibold w-32 text-sm">SUB-GRUPO:</label>
+            <Select value={subGrupo} onValueChange={setSubGrupo}>
+              <SelectTrigger className="w-60">
+                <SelectValue placeholder="Selecione..." />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectGroup>
+                  {
+                    listSubGrupos.map(item => (
+                      <SelectItem key={item.id} value={String(item.id)}>{item.descricao}</SelectItem>
+                    ))
+                  }
+                </SelectGroup>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="flex flex-row gap-2 items-center">
+            <label className="font-semibold w-32 text-sm">MARCA:</label>
+            <Select value={marca} onValueChange={setMarca}>
+              <SelectTrigger className="w-60">
+                <SelectValue placeholder="Selecione..." />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectGroup>
+                  {
+                    listMarcas.map(item => (
+                      <SelectItem key={item.id} value={String(item.id)}>{item.descricao}</SelectItem>
+                    ))
+                  }
+                </SelectGroup>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="flex flex-row gap-2 items-center">
+            <label className="font-semibold w-32 text-sm">STATUS:</label>
+            <Select value={status} onValueChange={setStatus}>
+              <SelectTrigger className="w-60">
+                <SelectValue placeholder="Selecione..." />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectGroup>
+                  <SelectItem value="Incluido">Incluído</SelectItem>
+                  <SelectItem value="Alterado">Alterado</SelectItem>
+                  <SelectItem value="Baixado">Baixado</SelectItem>
+                </SelectGroup>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="flex flex-row gap-2 items-center">
+            <label className="font-semibold w-32 text-sm">MOTIVO DA BAIXA:</label>
+            <Input
+              className="w-60"
+              placeholder="Motivo da baixa..."
+              type="text"
+              value={String(motivoBaixa) ? String(motivoBaixa) : ""}
+              onChange={(e) => setMotivoBaixa(e.target.value)}
+            />
+          </div>
+
+          <div className="flex flex-row gap-2 items-center mt-4">
+            <Button onClick={atualiza} className="w-52 h-12 text-xl lg:w-32 lg:h-12">
+              Atualizar
+            </Button>
+          </div>
+
+        </form>
+        
       </div>
     </div>
   )
